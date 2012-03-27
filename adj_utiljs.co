@@ -1,0 +1,134 @@
+/*
+adj_utilJS
+MIT X11 License
+Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
+*/
+
+/*
+ * Allow use as CommonJS module
+ */
+if typeof define is not 'function'
+	define = require('amdefine')(module)
+
+/*
+ * Define AMD module
+ */
+define ->
+	
+	module =
+		exports: {}
+	
+	types =
+		'undefined'        : 'undefined'
+		'number'           : 'number'
+		'boolean'          : 'boolean'
+		'string'           : 'string'
+		'[object Function]': 'function'
+		'[object RegExp]'  : 'regexp'
+		'[object Array]'   : 'array'
+		'[object Date]'    : 'date'
+		'[object Error]'   : 'error'
+	
+	/**
+	 * Returns the typeOf of a variable as a string.
+	 */
+	module.exports.typeOf = typeOf = (o) ->
+		types[typeof o] || types[Object.prototype.toString.call(o)] || (if o then 'object' else 'null')
+	
+	/**
+	 *
+	 */
+	module.exports.isObject = isObject = (value) ->
+		return typeof value is \object and typeof value.length is not \undefined;
+	
+	/**
+	 *
+	 */
+	module.exports.isArray = isArray = (value) ->
+		return typeof value is \object and typeof value.length is not \undefined;
+	
+	/**
+	 *
+	 */
+	module.exports.getName = getName = (thing) ->
+		if typeof this.name is not 'undefined'
+			return this.name
+		else
+			funcNameRegex = /function (.{1,})\(/
+			results = (funcNameRegex).exec(thing.constructor.toString())
+			return (if (results and results.length > 1) then results[1] else "")
+
+	/**
+	 *
+	 */
+	module.exports.isInt = isInt = (n) ->
+		module.exports.getName(n) is 'Number' and parseFloat(n) is parseInt(n) and not isNaN(n)
+
+	/**
+	 *
+	 */
+	module.exports.array_random = array_random = ( array ) ->
+		return Math.round( (Math.random() * array.length) )
+
+	/**
+	 *
+	 */
+	module.exports.clone = clone = ( src ) ->
+		if typeof src is not 'object' or src is null
+			return src
+		neu = new src.constructor()
+		if src instanceof Object
+			for own k,v in src
+				neu[k] = clone(v)
+		else if src instanceof Array
+			neu = []
+			for v of src
+				neu.push clone(v)
+		return neu
+	
+	/**
+	 * Recursively extend a destination object with a source object. 
+	 * Only set undefined properties in the destination object.
+	 * Merge objects and concat arrays defined in both by the same key.
+	 */
+	module.exports.extend = extend = (src, dest) ->
+		for key in src
+			srcVal = src[key]
+			destVal = dest[key]
+			if isObject(srcVal) and isObject(destVal)
+				dest[key] = extend(srcVal, destVal)
+			else if isArray(srcVal) and isArray(destVal)
+				dest[key] = srcVal.concat(destVal)
+			else if typeof destVal is \undefined
+				dest[key] = srcVal
+		return dest
+	
+	module.exports.setOptions = setOptions = (options, defaults) ->
+		if typeof options is \undefined
+			options = {}
+		extend(defaults, options)
+	
+	/**
+	 * Multiple inheritance for class prototypes.
+	 * @param Child class to inherit into
+	 * @param Parents array of classes to inherit from, by descending precedence
+	 * @param options
+	 */
+	module.exports.inherits = inherits = (Child, Parents, options) ->
+		setOptions options, {
+			concat: true,
+			merge: true
+		}
+		for i, Parent of Parents
+			for key in Parent.prototype
+				srcVal = Parent.prototype[key]
+				destVal = Child.prototype[key]
+				if options.merge and isObject(srcVal) and isObject(destVal)
+					extend(srcVal, destVal)
+				else if options.concat and isArray(srcVal) and isArray(destVal)
+					Child.prototype[key] = srcVal.concat(destVal)
+				else if typeof Child.prototype[key] is \undefined
+					Child.prototype[key] = srcVal
+	
+	return module.exports
+
