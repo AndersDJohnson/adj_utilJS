@@ -106,7 +106,16 @@ define ->
 	module.exports.setOptions = setOptions = (options, defaults) ->
 		if typeof options is \undefined
 			options = {}
-		extend(defaults, options)
+		extend defaults, options
+	
+	module.exports.merge = merge = (objects) ->
+		args = Array.prototype.slice.call @@, 0
+		if args.length > 1
+			objects = args
+		merged = {}
+		for object of objects
+			merged = extend merged, object
+		return merged
 	
 	/**
 	 * Multiple inheritance for class prototypes.

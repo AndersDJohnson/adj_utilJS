@@ -3,11 +3,10 @@ adj_utilJS
 MIT X11 License
 Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
 */
-
-/*
- * Allow use as CommonJS module
- */
 (function(){
+  /*
+   * Allow use as CommonJS module
+   */
   var define;
   if (typeof define !== 'function') {
     define = require('amdefine')(module);
@@ -16,7 +15,7 @@ Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
    * Define AMD module
    */
   define(function(){
-    var module, types, typeOf, isObject, isArray, getName, isInt, array_random, clone, extend, setOptions, inherits;
+    var module, types, typeOf, isObject, isArray, getName, isInt, array_random, clone, extend, setOptions, merge, inherits;
     module = {
       exports: {}
     };
@@ -103,16 +102,16 @@ Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
      * Merge objects and concat arrays defined in both by the same key.
      */
     module.exports.extend = extend = function(src, dest){
-      var key, srcVal, destVal, _results = [];
+      var key, srcVal, destVal;
       for (key in src) {
         srcVal = src[key];
         destVal = dest[key];
         if (isObject(srcVal) && isObject(destVal)) {
-          _results.push(dest[key] = extend(srcVal, destVal));
+          dest[key] = extend(srcVal, destVal);
         } else if (isArray(srcVal) && isArray(destVal)) {
-          _results.push(dest[key] = srcVal.concat(destVal));
+          dest[key] = srcVal.concat(destVal);
         } else if (typeof destVal === 'undefined') {
-          _results.push(dest[key] = srcVal);
+          dest[key] = srcVal;
         }
       }
       return dest;
@@ -122,6 +121,19 @@ Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
         options = {};
       }
       return extend(defaults, options);
+    };
+    module.exports.merge = merge = function(objects){
+      var args, merged, object, _i, _len;
+      args = Array.prototype.slice.call(arguments, 0);
+      if (args.length > 1) {
+        objects = args;
+      }
+      merged = {};
+      for (_i = 0, _len = objects.length; _i < _len; ++_i) {
+        object = objects[_i];
+        merged = extend(merged, object);
+      }
+      return merged;
     };
     /**
      * Multiple inheritance for class prototypes.
@@ -153,35 +165,4 @@ Copyright (C) 2012 Anders D. Johnson <AndersDJohnson@gmail.com>
     };
     return module.exports;
   });
-  /*
-  module.exports.mkdirpSync = (dir) ->
-  	path = require "path"
-  	fs = require "fs"
-  	
-  	# normalize and resolve path to an absolute one:
-  	# (path.resolve automatically uses the current directory if needed)
-  	dir = path.resolve path.normalize dir
-  
-  	# try to create this directory:
-  	try
-  		# XXX hardcoding recommended file mode of 511 (0777 in octal)
-  		# (note that octal numbers are disallowed in ES5 strict mode)
-  		fs.mkdirSync dir, 511
-  
-  	# and if we fail, base action based on why we failed:
-  	catch e
-  		if e.code is 'EEXIST'
-  		# base case: if the path already exists, we're good to go.
-  		# TODO account for this path being a file, not a dir?
-  			return
-  
-  		# recursive case: some directory in the path doesn't exist, so
-  		# make this path's parent directory.
-  		else if e.code is 'ENOENT'
-  			mkdirpSync path.dirname dir
-  			mkdirpSync dir
-  
-  		else
-  			throw e
-  */
 }).call(this);
