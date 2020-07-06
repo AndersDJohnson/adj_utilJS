@@ -1,8 +1,9 @@
 {
-    "name": "adj_utiljs",
-    "author": "Anders D. Johnson <AndersDJohnson@gmail.com>",
-    "description": "A collection of JS utilities.",
-    "keywords": [],
-    "version": "0.1.0",
-    "main": "./adj_utiljs"
+  "name": "adj_utiljs",
+  "author": "Anders D. Johnson <AndersDJohnson@gmail.com>",
+  "description": "A collection of JS utilities.",
+  "keywords": [],
+  "version": "0.1.0",
+  "main": "./adj_utiljs",
+  "license": "MIT"
 }
